@@ -1,0 +1,82 @@
+<html>
+
+<head>
+    <title>About</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+        integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+        integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
+        crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#header").load("navbar.html");
+        });
+    </script>
+    <div class="container-fluid" id="header">
+
+    </div>
+</head>
+
+<body>
+    <ul id="books"></ul>
+</body>
+
+<script>
+    $(document).ready(function () {
+
+
+        $('#books').empty();
+
+        $.ajax({
+            type: 'GET',
+            url: 'https://dblp.org/pid/r/RaghuReddy.xml',
+            dataType: 'xml',
+            success: function (xml) {
+                $(xml).find('r').each(function () {
+
+
+                    $('#books').append(
+                        '<div><h2>Raghu Reddy</h2>' +
+                        '<div><b>Title: </b>' +
+                        $(this).find('title').text() + '</div> ' +
+                        '<div><b>Year: </b>' +
+                        $(this).find('year').text() + '</div> ' +
+                        '<div><b>Url: </b>' +
+                        $(this).find('url').text() + '</div> ' +
+                        '</div><br>');
+                });
+            }
+        });
+        $.ajax({
+            type: 'GET',
+            url: ' https://dblp.org/pid/03/4045.xml',
+            dataType: 'xml',
+            success: function (xml) {
+                $(xml).find('r').each(function () {
+
+
+                    $('#books').append(
+                        '<div><h2>Vasu Varma</h2>' +
+                        '<div><b>Title: </b>' +
+                        $(this).find('title').text() + '</div> ' +
+                        '<div><b>Year: </b>' +
+                        $(this).find('year').text() + '</div> ' +
+                        '<div><b>Url: </b>' +
+                        $(this).find('url').text() + '</div> ' +
+                        '</div><br>');
+                });
+            }
+        });
+
+
+
+    });
+</script>
+
+</html>

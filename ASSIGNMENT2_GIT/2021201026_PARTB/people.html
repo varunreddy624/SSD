@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <title>About</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js" integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous"></script>
+        <script  src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <link rel="stylesheet" href="styles/people.css" />
+        <script type="text/javascript">
+            $(function(){
+            $("#header").load("navbar.html"); 
+            });
+        </script>
+        <div class="container-fluid" id="header">
+
+        </div>
+    </head>
+  <body>
+       <nav id="sidebarMenu" >
+        <div class="position-sticky">
+            <div class="list-group list-group-flush mx-3 mt-4">
+                <a href="#" id="Faculty" class="list-group-item list-group-item-action py-2 ripple active" onclick="changeToFaculty()">
+                    <i class="fas fa-chart-area fa-fw me-3"></i><span>Faculty Profiles</span>
+                </a>
+                <a href="#" id="Student" class="list-group-item list-group-item-action py-2 ripple" onclick="changeToStudent()">
+                    <i class="fas fa-lock fa-fw me-3"></i><span>Student Profiles</span>
+                </a>
+            </div>
+        </div>
+        </nav>
+    <div id="Faculty_Profiles" class="container mt-2">
+          <div class="row">
+            <div class="col-md-3 col-sm-6">
+              <div class="card card-block">
+            <img src="images/raghu reddy.jpg">
+                <h5 class="card-title mt-3 mb-3">Raghu Reddy</h5>
+                <p class="card-text">Associate Professor & Head</p> 
+          </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <div class="card card-block">
+            <img src="images/Venkatesh_Choppella.jpg">
+                <h5 class="card-title  mt-3 mb-3">Venkatesh Choppella</h5>
+                <p class="card-text">Associate Professor</p> 
+          </div>
+            </div> 
+          </div>
+    </div>
+    <div id="Student_Profiles" class="container mt-2">
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+              <div class="card card-block">
+            <img src="images/Sourav Sarangi.jpg">
+                <h5 class="card-title mt-3 mb-3">Sourav Sarangi</h5>
+          </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <div class="card card-block">
+            <img src="images/Kushal Singh.jpg">
+                <h5 class="card-title  mt-3 mb-3">Kushal Singh</h5>
+          </div>
+            </div> 
+          </div>
+    </div>
+    <script src="js/people.js"></script>
+    </body>
+</html>
+
+  
+  
+  
