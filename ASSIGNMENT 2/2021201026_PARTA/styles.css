@@ -1,0 +1,82 @@
+header{
+    position: fixed;
+    width: 100%;
+    top: 1%;
+}
+
+
+body{
+    font-family: 'Rubik', sans-serif;
+    padding: 1%;
+}
+
+img{
+    border-radius: 3%;
+}
+
+.logo{
+    height: 5%;
+    width: 5%;
+    padding-right: 0.5%;
+    padding-left: 0.5%;
+}
+
+.image{
+    height: 150px;
+    width: 150px;
+}
+
+
+/* .profileImage{
+    float: left;
+} */
+
+.otherTables{
+    width: 25%;
+    border-color: black;
+    border-radius: 3%;
+    border-spacing: 5px;
+}
+
+.projects{
+    width: 75%;
+    border-color: black;
+    border-radius: 3%;
+    border-spacing: 5px; 
+}
+
+td{
+    border-radius: 5%;
+}
+
+.table-data{
+    padding: 25px;
+}
+
+.navbar{
+    overflow: hidden;
+}
+
+nav a{
+    float:left;
+    display: block;
+    text-decoration: none;
+    font-size: large;
+    padding-left: 2.5%;
+    padding-right: 2.5%;
+    background-color:rgb(127, 161, 182);
+    color: black;
+    border-radius: 13px;
+}
+
+a{
+    text-decoration: none;  
+}
+
+nav a:hover{
+    background-color: rgb(42, 226, 82);
+}
+
+.navbar{
+    font-family: 'Space Mono', monospace;
+}
