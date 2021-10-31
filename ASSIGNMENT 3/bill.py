@@ -1,6 +1,8 @@
 import csv
 import random
 from typing import final
+
+
 menu=[]
 with open('Menu.csv','r') as csv_file:
     reader = csv.reader(csv_file)
@@ -13,24 +15,31 @@ for i in range(len(menu)):
     if i!=0:
         print("\t".join(menu[i]))
     
+order=[]
+totalCostOfOrder=0
 
 
-print("enter item id from menu")
-itemid = int(input())
-print("if plate enter 1 if full enter 2")
-type = int(input())
-print("enter quantity")
-quantity = int(input())
+while(1):
+    print("enter item id from menu or enter -1 to finish order")
+    itemid = int(input())
+    if itemid==-1:
+        break
+    print("if plate enter 1; if full enter 2")
+    type = int(input())
+    print("enter quantity")
+    quantity = int(input())
+    order.append([itemid,type,quantity])
+    totalCostOfOrder+=(int(menu[itemid][type])*quantity)
+
 print("enter the percentage of tip in number of either 0 or 10 or 20")
 tip = int(input())
-total = (1+(0.01*(tip)))*int(menu[itemid][type])*quantity
-total = round(total,2)
-print("amount to be paid is "+str(total))
+tipValue = round(totalCostOfOrder*(0.01)*tip,2)
+totalCostOfOrder+=tipValue
+print(f'amount to be paid is {format(totalCostOfOrder,".2f")}')
 print("enter number of people to split bill")
 numberOfPeopleToSplit = int(input())
-individualShare = total / numberOfPeopleToSplit
-individualShare = round(individualShare,2)
-print("share for each person "+str(individualShare))
+individualShare = round(totalCostOfOrder/numberOfPeopleToSplit,2)
+print(f'share for each person {format(individualShare,".2f")}')
 print("The restaurant has started a limited time event called “Test your luck”. Do you wish to participate in this event? Input yes or no")
 choice = input()
 if choice=="yes":
@@ -45,7 +54,6 @@ if choice=="yes":
         2/40 ==> 5% probability for -50%
     '''
     randomDiscountOutcome = random.choice(arr)
-    print("result of lucky draw is "+str(randomDiscountOutcome)+"%")
     if(randomDiscountOutcome >= 0):
         print(" **** ")
         print("*    *")
@@ -53,6 +61,7 @@ if choice=="yes":
         print("*    *")
         print("*    *")
         print(" **** ")
+        print(f'better luck next time, for now your bill is increased by {randomDiscountOutcome}%')
     else:
         print(" ****\t ****")
         print("|    |\t|    |")
@@ -61,25 +70,18 @@ if choice=="yes":
         print(" ****\t ****")
         print("      {}")
         print("    ______")
+        print(f'congratulations, you got a discount of {randomDiscountOutcome}% on the bill')
 else:
     randomDiscountOutcome = 0
 
-
-print(f'Item {itemid}[{quantity}]: {int(menu[itemid][type])*quantity}')
-print(f'Total: {int(menu[itemid][type])*quantity}')
-print(f'Tip percentage: {tip}')
-print(f'Discout/Increase Percent: {randomDiscountOutcome}')
-finalTotal = (1+(0.01*randomDiscountOutcome))*total
-finalTotal = round(finalTotal,2)
-print(f'Final Total: {finalTotal}')
-updatedShare = finalTotal/numberOfPeopleToSplit
+for i in order:
+    print(f'Item {i[0]}[{i[2]}]: {int(menu[i[0]][i[1]])*i[2]}')
+print(f'Total: {format(totalCostOfOrder-tipValue,".2f")}')
+print(f'Tip: {format(tipValue,".2f")}')
+randomDiscountValue = round(totalCostOfOrder*(0.01)*randomDiscountOutcome,2)
+print(f'Discout/Increase: {format(randomDiscountValue,".2f")}')
+totalCostOfOrder += randomDiscountValue
+print(f'Final Total: {format(totalCostOfOrder,".2f")}')
+updatedShare = round(totalCostOfOrder/numberOfPeopleToSplit,2)
 updatedShare = round(updatedShare,2)
-print("Updated share of each person is: "+str(updatedShare))
-
-
-# 5
-# 1
-# 3
-# 20
-# 2
-# yes
+print(f'Updated share of each person is: {format(updatedShare,".2f")}')
