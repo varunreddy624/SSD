@@ -1,6 +1,6 @@
 import csv
 import random
-from typing import final
+from typing import DefaultDict, final
 
 
 menu=[]
@@ -15,7 +15,7 @@ for i in range(len(menu)):
     if i!=0:
         print("\t".join(menu[i]))
     
-order=[]
+order=DefaultDict(lambda: [0,0])
 totalCostOfOrder=0
 
 
@@ -24,12 +24,14 @@ while(1):
     itemid = int(input())
     if itemid==-1:
         break
-    print("if plate enter 1; if full enter 2")
+    print("if half enter 1; if full enter 2")
     type = int(input())
     print("enter quantity")
     quantity = int(input())
-    order.append([itemid,type,quantity])
+    order[itemid][type-1]+=quantity
     totalCostOfOrder+=(int(menu[itemid][type])*quantity)
+
+print(order)
 
 print("enter the percentage of tip in number of either 0 or 10 or 20")
 tip = int(input())
@@ -75,9 +77,12 @@ else:
     randomDiscountOutcome = 0
 
 for i in order:
-    print(f'Item {i[0]}[{i[2]}]: {int(menu[i[0]][i[1]])*i[2]}')
+    if order[i][0]>0:
+        print(f'Item {i}[Half][{order[i][0]}]: {format(int(menu[i][1])*order[i][0],".2f")}')
+    if order[i][1]>0:
+        print(f'Item {i}[Full][{order[i][1]}]: {format(int(menu[i][2])*order[i][1],".2f")}')
 print(f'Total: {format(totalCostOfOrder-tipValue,".2f")}')
-print(f'Tip: {format(tipValue,".2f")}')
+print(f'Tip: {format(tip,".2f")}%')
 randomDiscountValue = round(totalCostOfOrder*(0.01)*randomDiscountOutcome,2)
 print(f'Discout/Increase: {format(randomDiscountValue,".2f")}')
 totalCostOfOrder += randomDiscountValue
@@ -85,3 +90,20 @@ print(f'Final Total: {format(totalCostOfOrder,".2f")}')
 updatedShare = round(totalCostOfOrder/numberOfPeopleToSplit,2)
 updatedShare = round(updatedShare,2)
 print(f'Updated share of each person is: {format(updatedShare,".2f")}')
+
+# 1
+# 1
+# 2
+# 5
+# 1
+# 6
+# 1
+# 2
+# 3
+# 5
+# 1
+# 2
+# -1
+# 20
+# 7
+# yes
