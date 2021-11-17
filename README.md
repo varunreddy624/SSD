@@ -1,1 +1,2 @@
-- Mysql works, don't know if i installed more than too much of packages
+ - Null values are being created whenever db table is created  
+- **pipreqs --encoding=utf8 .\ASSIGNMENT3-PARTB** will show all the required packages that needs to be installed 
