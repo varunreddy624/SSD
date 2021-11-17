@@ -6,8 +6,12 @@ from flask_login import LoginManager, UserMixin
 
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:mYSQLSERVER@localhost:3306/testdb"
+
 db = SQLAlchemy(app)
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
