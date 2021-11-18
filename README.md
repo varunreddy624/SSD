@@ -1,2 +1,3 @@
  - Null values are being created whenever db table is created  
-- **pipreqs --encoding=utf8 .\ASSIGNMENT3-PARTB** will show all the required packages that needs to be installed 
+- **pipreqs --encoding=utf8 .\ASSIGNMENT3-PARTB** will show all the required packages that needs to be installed  
+- Fetch must be executed before order can be placed

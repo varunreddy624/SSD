@@ -17,13 +17,13 @@ while(1):
         half_plate_price=int(input())
         print("enter full plate price")
         full_plate_price=int(input())
-        res = requests.post('http://localhost:8000/create',json= {'item_id':item_id,'half_plate_price':half_plate_price,'full_plate_price':full_plate_price}).content
+        res = requests.post('http://localhost:8000/menu/add',json= {'item_id':item_id,'half_plate_price':half_plate_price,'full_plate_price':full_plate_price}).content
         obj = json.loads(res)
         json_formatted_str = json.dumps(obj, indent=4, separators=(',',': '))
         print(json_formatted_str)
 
     elif choice==2:
-        res = requests.get('http://localhost:8000/read').content
+        res = requests.get('http://localhost:8000/menu/fetch').content
         obj = json.loads(res)
         print("item id\t\thalf plate price\tfull plate price")
         for i in obj:
