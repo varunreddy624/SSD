@@ -1,3 +1,4 @@
  - Null values are being created whenever db table is created  
 - **pipreqs --encoding=utf8 .\ASSIGNMENT3-PARTB** will show all the required packages that needs to be installed  
-- Fetch must be executed before order can be placed
+- Fetch must be executed before order can be placed  
+- Can the use order items multiple times, if yes, should the random discount and tip be updated each time or only when during bill generation? - did for only during bill generation  

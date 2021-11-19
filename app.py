@@ -1,3 +1,4 @@
+from collections import defaultdict
 from flask import Flask, request, jsonify, session
 from flask_session import Session
 from flask_restful import Api, Resource
@@ -27,7 +28,7 @@ class Transactions(UserMixin, db.Model):
     transaction_id = db.Column(db.Integer, primary_key=True)
     item_total_cost = db.Column(db.Integer, nullable=False)
     tip_percent = db.Column(db.Float, nullable=False)
-    number_of_persons_to_split = db.Column(db.Integer, nullable=False)
+    updated_share_of_each_person = db.Column(db.Float, nullable=False)
     random_discount_val= db.Column(db.Float, nullable=False)
     total_bill_cost = db.Column(db.Float, nullable=False)
 
@@ -39,7 +40,6 @@ class ItemList(UserMixin, db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('menu.item_id'),primary_key=True)
     type = db.Column(db.String(30),primary_key=True)
     quantity = db.Column(db.Integer,nullable=False)
-
 
 
 class MenuAdd(Resource):
@@ -77,14 +77,14 @@ class TransactionAdd(Resource):
         data_posted_by_user = request.get_json()
         item_total_cost = data_posted_by_user['item_total_cost']
         tip_percent = data_posted_by_user['tip_percent']
-        number_of_persons_to_split = data_posted_by_user['number_of_persons_to_split']
+        updated_share_of_each_person = data_posted_by_user['updated_share_of_each_person']
         random_discount_val = data_posted_by_user['random_discount_val']
         total_bill_cost = data_posted_by_user['total_bill_cost']
 
         transObj = Transactions(
                                 item_total_cost=item_total_cost,
                                 tip_percent=tip_percent,
-                                number_of_persons_to_split=number_of_persons_to_split,
+                                updated_share_of_each_person=updated_share_of_each_person,
                                 random_discount_val=random_discount_val,
                                 total_bill_cost=total_bill_cost
                                 )
@@ -98,25 +98,67 @@ class ItemAdd(Resource):
     def post(self):
         data_posted_by_user = request.get_json()
         transaction_id = data_posted_by_user['transaction_id']
-        item_id = data_posted_by_user['item_id']
-        type = data_posted_by_user['type']
-        quantity = data_posted_by_user['quantity']
+        items_list = data_posted_by_user['items_list']
 
-        itemListObj = ItemList(
-                            transaction_id=transaction_id,
-                            item_id=item_id,
-                            type=type,
-                            quantity=quantity
-                        )
-        db.session.add(itemListObj)
+        for i in items_list:
+            itemListObj = ItemList(
+                                transaction_id=transaction_id,
+                                item_id=i['item_id'],
+                                type=i['type'],
+                                quantity=i['quantity']
+                            )
+            db.session.add(itemListObj)
+
         db.session.commit()
         return "item added successfully"
+
+class TransactionView(Resource):
+    def get(self):
+        data = Transactions.query.all()
+        returnValue = {}
+        for tx in data:
+            returnValue[tx.transaction_id] = {"total_bill_cost": tx.total_bill_cost}
+        return jsonify(returnValue)
+
+
+class TransactionSpecificView(Resource):
+    def post(self):
+        data_posted_by_user = request.get_json()
+
+        transaction_id = data_posted_by_user['transaction_id']
+
+        transaction_summary = Transactions.query.filter_by(transaction_id=transaction_id).first()
+        itemList = ItemList.query.filter_by(transaction_id=transaction_id)
+
+        order=defaultdict(lambda: [0, 0])
+        for i in itemList:
+            if i.type=="Half":
+                order[i.item_id][0]=i.quantity
+            else:
+                order[i.item_id][1]=i.quantity
+
+        returnValue = {}
+        returnValue['order']=order
+        returnValue['item_total_cost']=transaction_summary.item_total_cost
+        returnValue['random_discount_val']=transaction_summary.random_discount_val
+        returnValue['total_bill_cost']=transaction_summary.total_bill_cost
+        returnValue['updated_share_of_each_person']=transaction_summary.updated_share_of_each_person
+        returnValue['tip_percent']=transaction_summary.tip_percent
+        
+        print(returnValue)
+
+        return jsonify({'data':returnValue})
+        
 
 
 api.add_resource(MenuAdd, '/menu/add')
 api.add_resource(MenuRead, '/menu/fetch')
+
 api.add_resource(ItemAdd,'/item_list/add')
+
 api.add_resource(TransactionAdd,'/transaction/add')
+api.add_resource(TransactionView,'/transaction/fetch/all')
+api.add_resource(TransactionSpecificView,'/transaction/fetch/specific')
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
