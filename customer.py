@@ -4,16 +4,55 @@ from flask.wrappers import Response
 from werkzeug.wrappers import response
 import requests, json, random
 
+session = requests.Session()
+
 order = defaultdict(lambda: [0, 0])
 menu = {}
 totalCostOfOrder = 0
+is_logged_in = False
 
+
+def signup():
+    username = input("enter username\n")
+    password = input("enter password\n")
+    is_chef = False
+
+    res = session.post('http://localhost:8000/signup',json={
+        'username':username,
+        'password':password,
+        'is_chef':is_chef
+    }).content
+
+    obj = json.loads(res)
+    
+    print(obj['data'])
+
+def login():
+
+    global is_logged_in
+
+    username = input("enter username\n")
+    password = input("enter password\n")
+
+    res = session.post('http://localhost:8000/login',json={
+        'username':username,
+        'password':password,
+    }).content
+
+    obj = json.loads(res)
+
+    if(obj['data']=="success"):
+        is_logged_in = True
+        print("login success")
+
+    else:
+        print("invalid credentials")
 
 def getMenu():
     global menu
     menu = {}
         
-    res = requests.get('http://localhost:8000/menu/fetch').content
+    res = session.get('http://localhost:8000/menu/fetch').content
     obj = json.loads(res)
     for i in obj:
         menu[int(i)]=[obj[i]["half_plate_price"],obj[i]["full_plate_price"]]
@@ -147,7 +186,7 @@ def generateBill():
 
         printBill(total_bill_summary)
 
-        res = requests.post('http://localhost:8000/transaction/add',json= {
+        res = session.post('http://localhost:8000/transaction/add',json= {
                                                                             'item_total_cost':item_total_cost,
                                                                             'tip_percent':tip,
                                                                             'updated_share_of_each_person':updatedShare,
@@ -172,7 +211,7 @@ def generateBill():
                                     'quantity':order[i][1]
                                     }) 
             
-        requests.post('http://localhost:8000/item_list/add',json= {
+        session.post('http://localhost:8000/item_list/add',json= {
                                                                         'transaction_id':transaction_id,
                                                                         'items_list':orderSummary
                                                                 })
@@ -188,7 +227,7 @@ def viewPreviousTransactions():
     if menu=={}:
         getMenu()
 
-    res = requests.get('http://localhost:8000/transaction/fetch/all').content
+    res = session.get('http://localhost:8000/transaction/fetch/all').content
     obj = json.loads(res)
     if(len(obj)==0):
         print("no transactions made yet")
@@ -204,34 +243,42 @@ def viewPreviousTransactions():
             if str(choice) not in obj:
                 print("enter valid transaction id in the list")
             else:
-                res = requests.post('http://localhost:8000/transaction/fetch/specific',json={'transaction_id':choice}).content
+                res = session.post('http://localhost:8000/transaction/fetch/specific',json={'transaction_id':choice}).content
                 obj = json.loads(res)
                 printBill(obj['data'])
 
 
 while(1):
     print("select any of the following choices")
-    print("1. Fetch the menu")
-    print("2. Order items")
-    print("3. Generate Bill")
-    print("4. View Previous Transactions")
-    print("5. Exit")
+    print("1. signup")
+    print("2. login")
+    print("3. Fetch the menu")
+    print("4. Order items")
+    print("5. Generate Bill")
+    print("6. View Previous Transactions")
+    print("7. logout")
     choice = int(input())
 
     if choice==1:
+        signup()
+    
+    elif choice==2:
+        login()
+
+    elif choice==3:
         getMenu()
         printMenu()
 
-    elif choice==2:
+    elif choice==4:
         getOrder()
     
-    elif choice==3:
+    elif choice==5:
         generateBill()
 
-    elif choice==4:
+    elif choice==6:
         viewPreviousTransactions()
 
-    elif choice==5:
+    elif choice==7:
         break
 
     else:

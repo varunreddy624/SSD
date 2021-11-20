@@ -1,17 +1,39 @@
 from collections import defaultdict
-from flask import Flask, request, jsonify, session
-from flask_session import Session
+from flask import Flask, json, request, jsonify
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin, login_user, logout_user
 
 
 app = Flask(__name__)
+app.secret_key = 'something which cannot be guessed'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
 api = Api(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:mYSQLSERVER@localhost:3306/testdb"
 
 db = SQLAlchemy(app)
+
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'user'
+    username = db.Column(db.String(50),primary_key=True)
+    password = db.Column(db.String(50))
+    is_chef = db.Column(db.Boolean, default=False)
+
+    def get_id(self):
+        return self.username
+
+    def is_active(self):
+        return True
+
+
+@login_manager.user_loader
+def user_loader(user_id):
+    return User.objects(username=user_id).first()
 
 
 class Menu(UserMixin, db.Model):
@@ -40,6 +62,47 @@ class ItemList(UserMixin, db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('menu.item_id'),primary_key=True)
     type = db.Column(db.String(30),primary_key=True)
     quantity = db.Column(db.Integer,nullable=False)
+
+
+class SignUp(Resource):
+    def post(self):
+        data_posted_by_user = request.get_json()
+        username = data_posted_by_user['username']
+        password = data_posted_by_user['password']
+        is_chef = data_posted_by_user['is_chef']
+        isPresent = User.query.filter_by(username=username).first()
+
+        returnValue = {}
+
+        if isPresent is not None:
+            returnValue['data']='username already exists'
+        
+        else:
+            userObj = User(username=username,password=password,is_chef=is_chef)
+            db.session.add(userObj)
+            db.session.commit()
+            returnValue['data']="signed up successfully"
+        
+        return jsonify(returnValue)
+
+
+
+class Login(Resource):
+    def post(self):
+        data_posted_by_user = request.get_json()
+        username = data_posted_by_user['username']
+        password = data_posted_by_user['password']
+        user = User.query.filter_by(username=username,password=password).first()
+        
+        returnValue = {}
+        if user:
+            login_user(user)
+            returnValue['data']='success'
+        
+        else:
+            returnValue['data']='failure'
+
+        return jsonify(returnValue)
 
 
 class MenuAdd(Resource):
@@ -150,6 +213,8 @@ class TransactionSpecificView(Resource):
         return jsonify({'data':returnValue})
         
 
+api.add_resource(SignUp,'/signup')
+api.add_resource(Login,'/login')
 
 api.add_resource(MenuAdd, '/menu/add')
 api.add_resource(MenuRead, '/menu/fetch')
