@@ -2,7 +2,9 @@ from collections import defaultdict
 from flask import Flask
 from flask.wrappers import Response
 from werkzeug.wrappers import response
-import requests, json, random
+import requests
+import json
+import random
 
 session = requests.Session()
 
@@ -16,17 +18,18 @@ is_logged_in = False
 def signup():
     username = input("enter username\n")
     password = input("enter password\n")
-    is_chef = True
+    is_chef = False
 
-    res = session.post('http://localhost:8000/signup',json={
-        'username':username,
-        'password':password,
-        'is_chef':is_chef
+    res = session.post('http://localhost:8000/signup', json={
+        'username': username,
+        'password': password,
+        'is_chef': is_chef
     }).content
 
     obj = json.loads(res)
-    
+
     print(obj['data'])
+
 
 def login():
 
@@ -35,14 +38,14 @@ def login():
     username = input("enter username\n")
     password = input("enter password\n")
 
-    res = session.post('http://localhost:8000/login',json={
-        'username':username,
-        'password':password,
+    res = session.post('http://localhost:8000/login', json={
+        'username': username,
+        'password': password,
     }).content
 
     obj = json.loads(res)
 
-    if(obj['data']=="success"):
+    if(obj['data'] == "success"):
         is_logged_in = True
         un = username
         print("login success")
@@ -53,24 +56,23 @@ def login():
 
 def logout():
 
-    global is_logged_in   
+    global is_logged_in
 
     session.get('http://localhost:8000/logout')
 
     is_logged_in = False
-    
+
     print("logout successfull")
- 
 
 
 def getMenu():
     global menu
     menu = {}
-        
+
     res = session.get('http://localhost:8000/menu/fetch').content
     obj = json.loads(res)
     for i in obj:
-        menu[int(i)]=[obj[i]["half_plate_price"],obj[i]["full_plate_price"]]
+        menu[int(i)] = [obj[i]["half_plate_price"], obj[i]["full_plate_price"]]
 
 
 def printMenu():
@@ -81,27 +83,26 @@ def printMenu():
 
 def printBill(total_bill_summary):
 
-    present_order=total_bill_summary['order']
-    item_total_cost=total_bill_summary['item_total_cost']
-    randomDiscountValue=total_bill_summary['random_discount_val']
-    totalCostOfOrder=total_bill_summary['total_bill_cost']
-    updatedShare=total_bill_summary['updated_share_of_each_person']
-    tip=total_bill_summary['tip_percent']
-
+    present_order = total_bill_summary['order']
+    item_total_cost = total_bill_summary['item_total_cost']
+    randomDiscountValue = total_bill_summary['random_discount_val']
+    totalCostOfOrder = total_bill_summary['total_bill_cost']
+    updatedShare = total_bill_summary['updated_share_of_each_person']
+    tip = total_bill_summary['tip_percent']
 
     for i in present_order:
-        menukey=i
-        if type(i)!=int:
-            menukey=int(i)
+        menukey = i
+        if not isinstance(i, int):
+            menukey = int(i)
 
         if present_order[i][0] > 0:
-            print(f'Item {i}[Half][{present_order[i][0]}]: {format(menu[menukey][0]*present_order[i][0], ".2f")}')
+            print(
+                f'Item {i}[Half][{present_order[i][0]}]: {format(menu[menukey][0]*present_order[i][0], ".2f")}')
         if present_order[i][1] > 0:
-            print(f'Item {i}[Full][{present_order[i][1]}]: {format(menu[menukey][1]*present_order[i][1], ".2f")}')
+            print(
+                f'Item {i}[Full][{present_order[i][1]}]: {format(menu[menukey][1]*present_order[i][1], ".2f")}')
 
-
-
-    print(f'Total: {format(item_total_cost,".2f")}')    
+    print(f'Total: {format(item_total_cost,".2f")}')
     print(f'Tip: {format(tip,".2f")}%')
     print(f'Discout/Increase: {format(randomDiscountValue,".2f")}')
     print(f'Final Total: {format(totalCostOfOrder,".2f")}')
@@ -109,13 +110,19 @@ def printBill(total_bill_summary):
 
 
 def getOrder():
-    if menu=={}:
+    if menu == {}:
         print("See the latest menu to order")
-        return 
-    
+        return
+
     else:
-        global totalCostOfOrder,order
-        print(order)
+        global totalCostOfOrder, order
+        if(len(order) != 0):
+            print("ther is an unfinished order pending")
+            choice = int(input(
+                "enter 0 to add to that order or enter 1 to discard unfinished order and create new order\n"))
+            if choice == 1:
+                totalCostOfOrder = 0
+                order = defaultdict(lambda: [0, 0])
         while(1):
             print("enter item id from menu or enter -1 to finish order")
             itemid = int(input())
@@ -126,32 +133,32 @@ def getOrder():
             print("enter quantity")
             quantity = int(input())
             order[itemid][type] += quantity
-            totalCostOfOrder += (int(menu[itemid][type])*quantity)
+            totalCostOfOrder += (int(menu[itemid][type]) * quantity)
 
 
 def generateBill():
-    global totalCostOfOrder,order
+    global totalCostOfOrder, order
 
-    if len(order)==0:
+    if len(order) == 0:
         print("Add items to generate bill")
-        return 
+        return
 
     else:
 
         print("enter the percentage of tip in number of either 0 or 10 or 20")
         tip = int(input())
-        tipValue = round(totalCostOfOrder*(0.01)*tip, 2)
+        tipValue = round(totalCostOfOrder * (0.01) * tip, 2)
         totalCostOfOrder += tipValue
         print(f'amount to be paid is {format(totalCostOfOrder,".2f")}')
         print("enter number of people to split bill")
         numberOfPeopleToSplit = int(input())
-        individualShare = round(totalCostOfOrder/numberOfPeopleToSplit, 2)
+        individualShare = round(totalCostOfOrder / numberOfPeopleToSplit, 2)
         print(f'share for each person {format(individualShare,".2f")}')
-        print("Do you wish to participate in an event called “Test your luck”?")
+        print("Do you wish to participate in an event called “Test your luck”")
         print("Input yes or no")
         choice = input()
         if choice == "yes":
-            arr = [20]*20 + [0]*8 + [-10]*6 + [-25]*4 + [-50]*2
+            arr = [20] * 20 + [0] * 8 + [-10] * 6 + [-25] * 4 + [-50] * 2
             '''
                 Above array's size is 40, values represent discout percentage.
                 So when we are randomly selecting an element from above array we have
@@ -170,7 +177,8 @@ def generateBill():
                 print("*    *")
                 print(" **** ")
                 print("better luck next time")
-                print(f'for now your bill is increased by {randomDiscountOutcome}%')
+                print(
+                    f'for now your bill is increased by {randomDiscountOutcome}%')
             else:
                 print(" ****             ****")
                 print("|    |          |    |")
@@ -180,57 +188,59 @@ def generateBill():
                 print("          {}")
                 print("    ______________")
                 print("congratulations")
-                print(f'you got a discount of {randomDiscountOutcome}% on the bill')
+                print(
+                    f'you got a discount of {randomDiscountOutcome}% on the bill')
         else:
             randomDiscountOutcome = 0
 
         total_bill_summary = {}
-        
-        item_total_cost = totalCostOfOrder-tipValue
-        randomDiscountValue = round(totalCostOfOrder*(0.01)*randomDiscountOutcome, 2)
+
+        item_total_cost = totalCostOfOrder - tipValue
+        randomDiscountValue = round(
+            totalCostOfOrder * (0.01) * randomDiscountOutcome, 2)
         totalCostOfOrder += randomDiscountValue
-        updatedShare = round(totalCostOfOrder/numberOfPeopleToSplit, 2)
+        updatedShare = round(totalCostOfOrder / numberOfPeopleToSplit, 2)
         updatedShare = round(updatedShare, 2)
-        
-        total_bill_summary['order']=order
-        total_bill_summary['updated_share_of_each_person']=updatedShare
-        total_bill_summary['item_total_cost']=item_total_cost
-        total_bill_summary['random_discount_val']=randomDiscountValue
-        total_bill_summary['total_bill_cost']=totalCostOfOrder
-        total_bill_summary['tip_percent']=tip
+
+        total_bill_summary['order'] = order
+        total_bill_summary['updated_share_of_each_person'] = updatedShare
+        total_bill_summary['item_total_cost'] = item_total_cost
+        total_bill_summary['random_discount_val'] = randomDiscountValue
+        total_bill_summary['total_bill_cost'] = totalCostOfOrder
+        total_bill_summary['tip_percent'] = tip
 
         printBill(total_bill_summary)
 
-        res = session.post('http://localhost:8000/transaction/add',json= {
-                                                                            'username': un,
-                                                                            'item_total_cost':item_total_cost,
-                                                                            'tip_percent':tip,
-                                                                            'updated_share_of_each_person':updatedShare,
-                                                                            'random_discount_val':randomDiscountValue,
-                                                                            'total_bill_cost':totalCostOfOrder
-                                                                            }).content
+        res = session.post('http://localhost:8000/transaction/add', json={
+            'username': un,
+            'item_total_cost': item_total_cost,
+            'tip_percent': tip,
+            'updated_share_of_each_person': updatedShare,
+            'random_discount_val': randomDiscountValue,
+            'total_bill_cost': totalCostOfOrder
+        }).content
 
         transaction_id = json.loads(res)['transaction_id']
-        
-        orderSummary=[]
+
+        orderSummary = []
         for i in order:
             if order[i][0] > 0:
                 orderSummary.append({
-                                    'item_id':i,
+                                    'item_id': i,
                                     'type': 'Half',
-                                    'quantity':order[i][0]
+                                    'quantity': order[i][0]
                                     })
             if order[i][1] > 0:
                 orderSummary.append({
-                                    'item_id':i,
+                                    'item_id': i,
                                     'type': 'Full',
-                                    'quantity':order[i][1]
-                                    }) 
-            
-        session.post('http://localhost:8000/item_list/add',json= {
-                                                                    'transaction_id':transaction_id,
-                                                                    'items_list':orderSummary
-                                                                })
+                                    'quantity': order[i][1]
+                                    })
+
+        session.post('http://localhost:8000/item_list/add', json={
+            'transaction_id': transaction_id,
+            'items_list': orderSummary
+        })
         print("bill added to db successfully")
 
         order = defaultdict(lambda: [0, 0])
@@ -240,46 +250,54 @@ def generateBill():
 def viewPreviousTransactions():
     global menu
 
-    if menu=={}:
+    if menu == {}:
         getMenu()
 
-    res = session.post('http://localhost:8000/transaction/fetch/all',json={
-                                                                            'username': un
-                                                                        }).content
+    res = session.post('http://localhost:8000/transaction/fetch/all', json={
+        'username': un
+    }).content
     obj = json.loads(res)
-    if(len(obj)==0):
+    if(len(obj) == 0):
         print("no transactions made yet")
         return
     else:
         print("transaction id \t\t total cost")
         for i in obj:
             print(f'{i}\t\t\t {obj[i]["total_bill_cost"]}')
-        choice = int(input("enter the transaction id to view the transaction or -1 to exit\n"))
-        if choice==-1:
-            return 
+        choice = int(
+            input("enter the transaction id to view the transaction or -1 to exit\n"))
+        if choice == -1:
+            return
         else:
             if str(choice) not in obj:
                 print("enter valid transaction id in the list")
             else:
-                res = session.post('http://localhost:8000/transaction/fetch/specific',json={
-                                                                                            'transaction_id':choice,
-                                                                                            }).content
+                res = session.post(
+                    'http://localhost:8000/transaction/fetch/specific',
+                    json={
+                        'transaction_id': choice,
+                    }).content
                 obj = json.loads(res)
                 printBill(obj['data'])
 
 
 def addItem():
     print("enter item id")
-    item_id=int(input())
+    item_id = int(input())
     print("enter half plate price")
-    half_plate_price=int(input())
+    half_plate_price = int(input())
     print("enter full plate price")
-    full_plate_price=int(input())
-    res = requests.post('http://localhost:8000/menu/add',json= {'username':un,'item_id':item_id,'half_plate_price':half_plate_price,'full_plate_price':full_plate_price}).content
+    full_plate_price = int(input())
+    res = requests.post(
+        'http://localhost:8000/menu/add',
+        json={
+            'username': un,
+            'item_id': item_id,
+            'half_plate_price': half_plate_price,
+            'full_plate_price': full_plate_price}).content
     obj = json.loads(res)
-    json_formatted_str = json.dumps(obj, indent=4, separators=(',',': '))
+    json_formatted_str = json.dumps(obj, indent=4, separators=(',', ': '))
     print(json_formatted_str)
-
 
 
 while(1):
@@ -294,35 +312,35 @@ while(1):
     print("8. logout")
     choice = int(input())
 
-    if choice==1:
+    if choice == 1:
         signup()
-    
-    elif choice==2:
+
+    elif choice == 2:
         login()
 
     else:
         if not is_logged_in:
             print("login first")
-    
+
         else:
-            if choice==3:
+            if choice == 3:
                 getMenu()
                 printMenu()
 
-            elif choice==4:
+            elif choice == 4:
                 getOrder()
-            
-            elif choice==5:
+
+            elif choice == 5:
                 generateBill()
 
-            elif choice==6:
+            elif choice == 6:
                 viewPreviousTransactions()
 
-            elif choice==7:
+            elif choice == 7:
                 addItem()
 
-            elif choice==8:
+            elif choice == 8:
                 logout()
 
             else:
-                print("invalid option selected")    
+                print("invalid option selected")
