@@ -9,13 +9,14 @@ session = requests.Session()
 order = defaultdict(lambda: [0, 0])
 menu = {}
 totalCostOfOrder = 0
+un = ""
 is_logged_in = False
 
 
 def signup():
     username = input("enter username\n")
     password = input("enter password\n")
-    is_chef = False
+    is_chef = True
 
     res = session.post('http://localhost:8000/signup',json={
         'username':username,
@@ -29,7 +30,7 @@ def signup():
 
 def login():
 
-    global is_logged_in
+    global is_logged_in, un
 
     username = input("enter username\n")
     password = input("enter password\n")
@@ -43,10 +44,24 @@ def login():
 
     if(obj['data']=="success"):
         is_logged_in = True
+        un = username
         print("login success")
 
     else:
         print("invalid credentials")
+
+
+def logout():
+
+    global is_logged_in   
+
+    session.get('http://localhost:8000/logout')
+
+    is_logged_in = False
+    
+    print("logout successfull")
+ 
+
 
 def getMenu():
     global menu
@@ -187,6 +202,7 @@ def generateBill():
         printBill(total_bill_summary)
 
         res = session.post('http://localhost:8000/transaction/add',json= {
+                                                                            'username': un,
                                                                             'item_total_cost':item_total_cost,
                                                                             'tip_percent':tip,
                                                                             'updated_share_of_each_person':updatedShare,
@@ -212,8 +228,8 @@ def generateBill():
                                     }) 
             
         session.post('http://localhost:8000/item_list/add',json= {
-                                                                        'transaction_id':transaction_id,
-                                                                        'items_list':orderSummary
+                                                                    'transaction_id':transaction_id,
+                                                                    'items_list':orderSummary
                                                                 })
         print("bill added to db successfully")
 
@@ -227,7 +243,9 @@ def viewPreviousTransactions():
     if menu=={}:
         getMenu()
 
-    res = session.get('http://localhost:8000/transaction/fetch/all').content
+    res = session.post('http://localhost:8000/transaction/fetch/all',json={
+                                                                            'username': un
+                                                                        }).content
     obj = json.loads(res)
     if(len(obj)==0):
         print("no transactions made yet")
@@ -235,7 +253,7 @@ def viewPreviousTransactions():
     else:
         print("transaction id \t\t total cost")
         for i in obj:
-            print(f'{i}\t\t\t{obj[i]["total_bill_cost"]}')
+            print(f'{i}\t\t\t {obj[i]["total_bill_cost"]}')
         choice = int(input("enter the transaction id to view the transaction or -1 to exit\n"))
         if choice==-1:
             return 
@@ -243,9 +261,25 @@ def viewPreviousTransactions():
             if str(choice) not in obj:
                 print("enter valid transaction id in the list")
             else:
-                res = session.post('http://localhost:8000/transaction/fetch/specific',json={'transaction_id':choice}).content
+                res = session.post('http://localhost:8000/transaction/fetch/specific',json={
+                                                                                            'transaction_id':choice,
+                                                                                            }).content
                 obj = json.loads(res)
                 printBill(obj['data'])
+
+
+def addItem():
+    print("enter item id")
+    item_id=int(input())
+    print("enter half plate price")
+    half_plate_price=int(input())
+    print("enter full plate price")
+    full_plate_price=int(input())
+    res = requests.post('http://localhost:8000/menu/add',json= {'username':un,'item_id':item_id,'half_plate_price':half_plate_price,'full_plate_price':full_plate_price}).content
+    obj = json.loads(res)
+    json_formatted_str = json.dumps(obj, indent=4, separators=(',',': '))
+    print(json_formatted_str)
+
 
 
 while(1):
@@ -256,7 +290,8 @@ while(1):
     print("4. Order items")
     print("5. Generate Bill")
     print("6. View Previous Transactions")
-    print("7. logout")
+    print("7. Add item")
+    print("8. logout")
     choice = int(input())
 
     if choice==1:
@@ -265,21 +300,29 @@ while(1):
     elif choice==2:
         login()
 
-    elif choice==3:
-        getMenu()
-        printMenu()
-
-    elif choice==4:
-        getOrder()
-    
-    elif choice==5:
-        generateBill()
-
-    elif choice==6:
-        viewPreviousTransactions()
-
-    elif choice==7:
-        break
-
     else:
-        print("invalid option selected")    
+        if not is_logged_in:
+            print("login first")
+    
+        else:
+            if choice==3:
+                getMenu()
+                printMenu()
+
+            elif choice==4:
+                getOrder()
+            
+            elif choice==5:
+                generateBill()
+
+            elif choice==6:
+                viewPreviousTransactions()
+
+            elif choice==7:
+                addItem()
+
+            elif choice==8:
+                logout()
+
+            else:
+                print("invalid option selected")    

@@ -1,12 +1,14 @@
 use testdb;
-drop table item_list;
-drop table transactions;
-drop table menu;
-drop table user;
 show tables;
 
-use testdb;
 select * from user;
 select * from menu;
 select * from transactions;
 select * from item_list;
+
+drop table transactions,menu,user;
+
+truncate table user;
+insert into user values('chef1','chefpwd',true);
+commit;
+
