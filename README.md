@@ -1,1 +1,1 @@
-# each assignment and projects are created as branches in this git repo
+# each assignment is created as branches in this git repo
